@@ -9,7 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_dotenv: ^5.2.1
   flutter_riverpod: ^2.6.1
+  livekit_client: ^2.4.1
   riverpod_annotation: ^2.6.1
 
 dev_dependencies:
@@ -23,3 +25,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - .env

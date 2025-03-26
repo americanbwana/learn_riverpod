@@ -6,30 +6,57 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 // my imports
 import 'package:learn_riverpod/screens/connection_screen.dart';
+import 'package:learn_riverpod/screens/livekit_screen.dart'; // Import LiveKit screen
 import 'config.dart';
 import 'services/connect_to_k4.dart';
+import 'services/livekit_connection_service.dart'; // Import LiveKit service
 import 'providers/connection_state_notifier.dart';
+import 'providers/livekit_connection_notifier.dart'; // Import LiveKit notifier
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Create the connection service
-  final connectionService = K4ConnectionService();
+    // Load the .env file
+    try {
+    await dotenv.load(fileName: ".env");
+    print('LIVEKIT_URL: ${dotenv.env['LIVEKIT_URL']}');
+    print('LIVEKIT_TOKEN: ${dotenv.env['LIVEKIT_TOKEN']}');
+  } catch (e) {
+    print('Failed to load .env file: $e');
+  }
 
-  // Initialize the connection
+  // Create the K4 connection service
+  final k4ConnectionService = K4ConnectionService();
+
+  // Initialize the K4 connection
   try {
-    await connectionService.connect(k4Host, k4Port);
+    await k4ConnectionService.connect(k4Host, k4Port);
     print('Connected to K4 on $k4Host:$k4Port');
   } catch (e) {
     print('Failed to connect to K4: $e');
   }
 
-  // Pass the connection service to the provider
+  // Create the LiveKit connection service
+  final liveKitConnectionService = LiveKitConnectionService();
+
+  // Initialize the LiveKit connection
+  try {
+    await liveKitConnectionService.connect();
+    print('Connected to LiveKit server');
+  } catch (e) {
+    print('Failed to connect to LiveKit server: $e');
+  }
+
+  // Pass the services to their respective providers
   runApp(
     ProviderScope(
       overrides: [
         connectionStateNotifierProvider.overrideWith(
-          (ref) => ConnectionStateNotifier(connectionService)..initializeState(),
+          (ref) => ConnectionStateNotifier(k4ConnectionService)..initializeState(),
+        ),
+        liveKitConnectionNotifierProvider.overrideWith(
+          (ref) => LiveKitConnectionNotifier(liveKitConnectionService),
         ),
       ],
       child: MyApp(),
@@ -56,28 +83,21 @@ class MyApp extends ConsumerWidget {
               Text('You have pushed the button this many times:'),
               Consumer(
                 builder: (context, ref, child) {
-                  /*
-                  This tells Riverpod to "watch" the state of counterProvider. 
-                  Whenever the state changes, Riverpod will automatically rebuild this part of the UI (the Text widget in this case) to reflect the new state.
-                  */
+                  // Watch the counterProvider state
                   final count = ref.watch(counterProvider);
                   return Text(
                     '$count',
-                    // style: Theme.of(context).textTheme.headline4,
                   );
                 },
               ),
-              // add connection_screen here
-              Expanded(child: ConnectionScreen(),),
+              // Add the K4 connection screen
+              Expanded(child: ConnectionScreen()),
+              // Add the LiveKit connection screen
+              Expanded(child: LiveKitScreen()),
             ],
           ),
         ),
         floatingActionButton: FloatingActionButton(
-          /* 
-          ref.read(counterProvider.notifier): This gives you access to the StateController of the counterProvider. 
-          The StateController is responsible for managing the state.
-          .state++: This increments the current state of the counterProvider by 1.
-          */
           onPressed: () => ref.read(counterProvider.notifier).state++,
           tooltip: 'Increment',
           child: Icon(Icons.add),

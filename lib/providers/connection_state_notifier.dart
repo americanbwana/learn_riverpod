@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/connection_state.dart';
 import '../services/connect_to_k4.dart';
 
+// The ConnectionStateNotifier class is responsible for managing the connection state and handling user actions related to the connection. It uses the K4ConnectionService to interact with the TCP connection.
+// StateNotifier<ConnectionState> loads the connection state model (models/connection_state.dart)
 class ConnectionStateNotifier extends StateNotifier<ConnectionState> {
   final K4ConnectionService _connectionService;
 

@@ -15,6 +15,7 @@ class ConnectionScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // watch the connection state
     final connectionState = ref.watch(connectionStateNotifierProvider);
 
     return Scaffold(
@@ -30,10 +31,13 @@ class ConnectionScreen extends ConsumerWidget {
             if (connectionState.status == ConnectionStatus.error)
               Text('Error: ${connectionState.error ?? "Unknown error"}'),
             ElevatedButton(
-              onPressed: connectionState.status == ConnectionStatus.connected
+              onPressed: connectionState.status == ConnectionStatus.connected 
+              // sendCommand if the connection is connected
                   ? () {
+                    // copy the results of the command to the state and notify listeners
                       ref.read(connectionStateNotifierProvider.notifier).sendCommand('FA;');
                     }
+                    // or don't if its not connected
                   : null,
               child: Text('Send Test Command'),
             ),
