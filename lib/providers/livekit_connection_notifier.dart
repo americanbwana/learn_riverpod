@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/livekit_connection_service.dart';
 
+/// Enum to represent the connection status
 enum LiveKitConnectionStatus { connected, disconnected, error }
 
+/// State class to manage LiveKit connection state
 class LiveKitConnectionState {
   final LiveKitConnectionStatus status;
   final String? error;
@@ -27,6 +29,7 @@ class LiveKitConnectionState {
   }
 }
 
+/// Notifier to manage LiveKit connection state
 class LiveKitConnectionNotifier extends StateNotifier<LiveKitConnectionState> {
   final LiveKitConnectionService _connectionService;
 
@@ -48,6 +51,10 @@ class LiveKitConnectionNotifier extends StateNotifier<LiveKitConnectionState> {
   Future<void> disconnect() async {
     await _connectionService.disconnect();
     state = state.copyWith(status: LiveKitConnectionStatus.disconnected);
+  }
+
+  Future<void> sendData(String message) async {
+    await _connectionService.sendData(message);
   }
 }
 

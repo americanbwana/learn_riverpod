@@ -4,44 +4,57 @@
 // - Display the connection status and latest response
 // - Provide a button or input field to send commands to K4
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
-// import '../providers/connection_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/connection_state.dart';
 import '../providers/connection_state_notifier.dart';
+import '../config.dart'; // Import config to get host and port
 
 class ConnectionScreen extends ConsumerWidget {
-  const ConnectionScreen({super.key});
+  const ConnectionScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // watch the connection state
+    // Watch the connection state
     final connectionState = ref.watch(connectionStateNotifierProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('K4 Connection'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text('Status: ${connectionState.status}'),
-            Text('Response: ${connectionState.response ?? "No response"}'),
-            if (connectionState.status == ConnectionStatus.error)
-              Text('Error: ${connectionState.error ?? "Unknown error"}'),
-            ElevatedButton(
-              onPressed: connectionState.status == ConnectionStatus.connected 
-              // sendCommand if the connection is connected
-                  ? () {
-                    // copy the results of the command to the state and notify listeners
-                      ref.read(connectionStateNotifierProvider.notifier).sendCommand('FA;');
-                    }
-                    // or don't if its not connected
-                  : null,
-              child: Text('Send Test Command'),
-            ),
-          ],
+    // Remove the Scaffold and just use a container with padding
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Center(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // Use min to prevent expansion
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Status: ${connectionState.status}'),
+              const SizedBox(height: 8),
+              Text('Response: ${connectionState.response ?? 'No response'}'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                // Only allow connect if disconnected
+                onPressed: connectionState.status == ConnectionStatus.disconnected
+                    ? () => ref.read(connectionStateNotifierProvider.notifier)
+                        .connect(k4Host, k4Port) // Use config values
+                    : null,
+                child: const Text('Connect'),
+              ),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: connectionState.status == ConnectionStatus.connected
+                    ? () => ref.read(connectionStateNotifierProvider.notifier).sendCommand('FA;')
+                    : null,
+                child: const Text('Send Command'),
+              ),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: connectionState.status == ConnectionStatus.connected
+                    ? () => ref.read(connectionStateNotifierProvider.notifier).disconnect()
+                    : null,
+                child: const Text('Disconnect'),
+              ),
+            ],
+          ),
         ),
       ),
     );

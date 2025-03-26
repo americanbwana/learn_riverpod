@@ -2,9 +2,14 @@
 
 import 'dart:async';
 import "package:learn_riverpod/services/connect_to_k4.dart";
+import "package:learn_riverpod/services/livekit_connection_service.dart";
 
 void main() async {
-  final k4Service = K4ConnectionService();
+  // Create a LiveKitConnectionService to pass to K4ConnectionService
+  final liveKitService = LiveKitConnectionService();
+  
+  // Create K4ConnectionService with the required LiveKitConnectionService
+  final k4Service = K4ConnectionService(liveKitService);
 
   // Define the host and port for the K4 device
   const host = '192.168.1.16'; // Replace with the actual host
@@ -30,7 +35,7 @@ void main() async {
 
     // Step 3: Send a test command
     print('Sending test command...');
-    k4Service.sendCommand('TEST;');
+    k4Service.sendCommand('FA;');
 
     // Wait for a few seconds to receive responses
     await Future.delayed(Duration(seconds: 5));
@@ -44,7 +49,8 @@ void main() async {
   } catch (e) {
     print('An error occurred: $e');
   } finally {
-    // Dispose of the service
-    k4Service.dispose();
+    // If the K4ConnectionService has a dispose method,
+    // uncomment the line below
+    // k4Service.dispose();
   }
 }
