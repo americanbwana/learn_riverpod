@@ -11,7 +11,7 @@ import '../providers/connection_state_notifier.dart';
 import '../config.dart'; // Import config to get host and port
 
 class ConnectionScreen extends ConsumerWidget {
-  const ConnectionScreen({Key? key}) : super(key: key);
+  const ConnectionScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
