@@ -17,7 +17,6 @@ Future<void> main() async {
   try {
     await dotenv.load(fileName: ".env");
     print('LIVEKIT_URL: ${dotenv.env['LIVEKIT_URL']}');
-    // print('LIVEKIT_TOKEN: ${dotenv.env['LIVEKIT_TOKEN']}');
   } catch (e) {
     print('Failed to load .env file: $e');
   }
@@ -26,9 +25,7 @@ Future<void> main() async {
   final liveKitService = LiveKitConnectionService();
   // Pass that into the K4ConnectionService.
   final k4ConnectionService = K4ConnectionService(liveKitService);
-
-  // Don't automatically connect on startup
-  // Let the user connect via the UI
+  // The services are now circular references to each other
 
   runApp(
     ProviderScope(
@@ -41,7 +38,7 @@ Future<void> main() async {
           (ref) => LiveKitConnectionNotifier(liveKitService),
         ),
       ],
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 }

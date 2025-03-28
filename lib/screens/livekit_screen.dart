@@ -49,6 +49,19 @@ class LiveKitScreen extends ConsumerWidget {
                 Text('Participant Name: ${connectionDetails?.participantName ?? localParticipant?.identity ?? 'Unknown'}'),
                 Text('Participant ID: ${localParticipant?.sid ?? 'Unknown'}'),
                 const SizedBox(height: 16),
+                
+                // Information about command forwarding
+                const Divider(),
+                const Text('Commands from LiveKit will be automatically forwarded to K4 if connected',
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                // Show message that commands are being forwarded
+                const Text('Note: Responses from K4 are also sent to LiveKit participants',
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                  textAlign: TextAlign.center,
+                ),
               ],
               
               // Display error if any
@@ -59,6 +72,7 @@ class LiveKitScreen extends ConsumerWidget {
                       style: const TextStyle(color: Colors.red)),
                 ),
               
+              const SizedBox(height: 16),
               // Connect button  
               ElevatedButton(
                 onPressed: connectionState.status == LiveKitConnectionStatus.disconnected

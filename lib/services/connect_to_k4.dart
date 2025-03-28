@@ -12,7 +12,21 @@ class K4ConnectionService {
   final LiveKitConnectionService _liveKitService;
 
   /// Constructor now requires a LiveKitConnectionService.
-  K4ConnectionService(this._liveKitService);
+  K4ConnectionService(this._liveKitService) {
+    // Set the K4 service in LiveKit to enable command forwarding
+    _liveKitService.setK4Service(this);
+    
+    // Listen for data received from LiveKit to forward to K4
+    _liveKitService.dataReceived.listen((message) {
+      if (isConnected()) {
+        // If message doesn't end with a semicolon, add it
+        final formattedCommand = message.trim().endsWith(';') 
+            ? message.trim() 
+            : '${message.trim()};';
+        sendCommand(formattedCommand);
+      }
+    });
+  }
 
   Future<void> connect(String host, int port) async {
     // If already connected, don't reconnect
@@ -53,7 +67,7 @@ class K4ConnectionService {
       // Send initial command
       sendCommand('IF;');
     } catch (e) {
-      print('Failed to connect: $e');
+      print('Failed to connect to K4: $e');
       rethrow;
     }
   }

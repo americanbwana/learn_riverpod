@@ -1,7 +1,9 @@
 import 'package:livekit_client/livekit_client.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:async';
 import '../models/livekit_connection_details.dart';
 import 'token_service.dart';
+import 'connect_to_k4.dart'; // Import K4ConnectionService
 
 /// Service to manage the connection to the LiveKit server.
 /// This class handles:
@@ -13,6 +15,11 @@ class LiveKitConnectionService {
   Room? _room; // LiveKit Room instance
   TokenService? _tokenService;
   LivekitConnectionDetails? _connectionDetails;
+  K4ConnectionService? _k4Service; // Reference to K4ConnectionService
+  
+  // Stream controller for received data
+  final StreamController<String> _dataReceivedController = 
+      StreamController<String>.broadcast();
   
   /// Creates a new LiveKitConnectionService
   ///
@@ -21,8 +28,13 @@ class LiveKitConnectionService {
     // Initialize token service with base URL from .env if available
     final tokenServerUrl = dotenv.env['TOKEN_SERVER_URL'];
     if (tokenServerUrl != null) {
-      _tokenService = TokenService(tokenServerUrl); // Corrected: no named parameter
+      _tokenService = TokenService(tokenServerUrl);
     }
+  }
+  
+  /// Set the K4ConnectionService to forward commands to
+  void setK4Service(K4ConnectionService k4Service) {
+    _k4Service = k4Service;
   }
 
   /// Connect to the LiveKit server.
@@ -90,6 +102,17 @@ class LiveKitConnectionService {
           final message = String.fromCharCodes(event.data);
           final sender = event.participant?.identity ?? 'unknown';
           print('Data received from $sender: $message');
+          
+          // Add to data stream
+          _dataReceivedController.add(message);
+          
+          // Forward to K4 if available
+          if (_k4Service != null && _k4Service!.isConnected()) {
+            print('Forwarding command to K4: $message');
+            _k4Service!.sendCommand(message);
+          } else {
+            print('Cannot forward command: K4 not connected');
+          }
         })
         ..on<ParticipantConnectedEvent>((event) {
           print('Participant connected: ${event.participant.identity}');
@@ -111,7 +134,6 @@ class LiveKitConnectionService {
     }
 
     try {
-      // In LiveKit 2.4.1, LocalParticipant can be null, so use ?. operator
       await _room!.localParticipant?.publishData(
         message.codeUnits, // Convert the message to a list of code units.
       );
@@ -138,4 +160,7 @@ class LiveKitConnectionService {
   
   /// Get the current connection details.
   LivekitConnectionDetails? get connectionDetails => _connectionDetails;
+  
+  /// Stream of received data messages
+  Stream<String> get dataReceived => _dataReceivedController.stream;
 }
