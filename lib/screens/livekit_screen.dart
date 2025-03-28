@@ -3,47 +3,91 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/livekit_connection_notifier.dart';
 
-/// Screen to manage LiveKit interactions
 class LiveKitScreen extends ConsumerWidget {
-  const LiveKitScreen({super.key});
+  const LiveKitScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final connectionState = ref.watch(liveKitConnectionNotifierProvider);
+    
+    // Get the connection service using the public getter
+    final connectionService = ref.read(liveKitConnectionNotifierProvider.notifier)
+        .connectionService;
+    
+    // Get connection details if available
+    final connectionDetails = connectionService.connectionDetails;
+    
+    // Get room information if connected
+    final room = connectionService.room;
+    final localParticipant = room?.localParticipant;
+    final participants = room?.remoteParticipants.length ?? 0;
 
-    return SizedBox(  // Add a SizedBox with a fixed height
-      height: 300,    // Give it a reasonable height
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text('LiveKit Status: ${connectionState.status}'),
-          if (connectionState.status == LiveKitConnectionStatus.error)
-            Text('Error: ${connectionState.error}'),
-          ElevatedButton(
-            onPressed: connectionState.status == LiveKitConnectionStatus.disconnected
-                ? () => ref
-                    .read(liveKitConnectionNotifierProvider.notifier)
-                    .connect()
-                : null,
-            child: Text('Connect to LiveKit'),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Center(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('LiveKit Status: ${connectionState.status}',
+                  style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 16),
+              
+              // Display connection details when connected
+              if (connectionState.status == LiveKitConnectionStatus.connected) ...[
+                // Room info
+                const Text('Room Information:', 
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                Text('Room Name: ${connectionDetails?.roomName ?? room?.name ?? 'Unknown'}'),
+                Text('Participants: $participants other participants'),
+                const SizedBox(height: 8),
+                
+                // Local participant info
+                const Text('Your Information:', 
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                Text('Participant Name: ${connectionDetails?.participantName ?? localParticipant?.identity ?? 'Unknown'}'),
+                Text('Participant ID: ${localParticipant?.sid ?? 'Unknown'}'),
+                const SizedBox(height: 16),
+              ],
+              
+              // Display error if any
+              if (connectionState.status == LiveKitConnectionStatus.error)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: Text('Error: ${connectionState.error}',
+                      style: const TextStyle(color: Colors.red)),
+                ),
+              
+              // Connect button  
+              ElevatedButton(
+                onPressed: connectionState.status == LiveKitConnectionStatus.disconnected
+                    ? () => ref.read(liveKitConnectionNotifierProvider.notifier).connect()
+                    : null,
+                child: const Text('Connect to LiveKit'),
+              ),
+              const SizedBox(height: 8),
+              
+              // Disconnect button
+              ElevatedButton(
+                onPressed: connectionState.status == LiveKitConnectionStatus.connected
+                    ? () => ref.read(liveKitConnectionNotifierProvider.notifier).disconnect()
+                    : null,
+                child: const Text('Disconnect from LiveKit'),
+              ),
+              const SizedBox(height: 8),
+              
+              // Send test message button
+              ElevatedButton(
+                onPressed: connectionState.status == LiveKitConnectionStatus.connected
+                    ? () => ref.read(liveKitConnectionNotifierProvider.notifier)
+                        .sendData('Test message from LiveKitScreen')
+                    : null,
+                child: const Text('Send Test Message'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: connectionState.status == LiveKitConnectionStatus.connected
-                ? () => ref
-                    .read(liveKitConnectionNotifierProvider.notifier)
-                    .disconnect()
-                : null,
-            child: Text('Disconnect from LiveKit'),
-          ),
-          ElevatedButton(
-            onPressed: connectionState.status == LiveKitConnectionStatus.connected
-                ? () => ref
-                    .read(liveKitConnectionNotifierProvider.notifier)
-                    .sendData('Test message from LiveKitScreen')
-                : null,
-            child: Text('Send Test Message'),
-          ),
-        ],
+        ),
       ),
     );
   }

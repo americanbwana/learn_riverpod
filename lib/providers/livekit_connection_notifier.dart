@@ -56,6 +56,9 @@ class LiveKitConnectionNotifier extends StateNotifier<LiveKitConnectionState> {
   Future<void> sendData(String message) async {
     await _connectionService.sendData(message);
   }
+  
+  // Public getter to access the connection service
+  LiveKitConnectionService get connectionService => _connectionService;
 }
 
 final liveKitConnectionNotifierProvider =

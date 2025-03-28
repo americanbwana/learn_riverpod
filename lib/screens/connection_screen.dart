@@ -7,7 +7,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/connection_state.dart';
-import '../providers/connection_state_notifier.dart';
+import '../providers/connection_state_notifier.dart'; // Make sure this is correct
 import '../config.dart'; // Import config to get host and port
 
 class ConnectionScreen extends ConsumerWidget {
@@ -17,6 +17,8 @@ class ConnectionScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Watch the connection state
     final connectionState = ref.watch(connectionStateNotifierProvider);
+    // add livekit connection state
+    // final liveKitConnectionState = ref.watch(liveKitConnectionNotifierProvider);
 
     // Remove the Scaffold and just use a container with padding
     return Padding(
@@ -60,4 +62,3 @@ class ConnectionScreen extends ConsumerWidget {
     );
   }
 }
-// The `ConnectionScreen` widget displays the connection status and responses from the K4 device. It uses a `ConsumerWidget` to watch the connection state provided by `connectionStateNotifierProvider`. The widget shows the connection status, the latest response received from the K4 device, and any errors that occurred during the connection process.
