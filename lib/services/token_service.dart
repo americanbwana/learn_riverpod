@@ -12,7 +12,7 @@ class TokenService {
   TokenService(String baseUrl) : _baseUrl = baseUrl;
 
   // Get the API_KEY 
-  static String _apiKey = dotenv.env['APP_API_KEY'] ?? '';
+  static final String _apiKey = dotenv.env['APP_API_KEY'] ?? '';
 
   /// Fetches a new LiveKit token for the specified room and participant
   Future<LivekitConnectionDetails> getToken({

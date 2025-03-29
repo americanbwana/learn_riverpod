@@ -4,7 +4,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 // Import your screens and services.
 import 'screens/connection_screen.dart';
 import 'screens/livekit_screen.dart';
-import 'config.dart';
 import 'services/connect_to_k4.dart';
 import 'services/livekit_connection_service.dart';
 import 'providers/connection_state_notifier.dart';

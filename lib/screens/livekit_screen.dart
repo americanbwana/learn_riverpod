@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/livekit_connection_notifier.dart';
 
 class LiveKitScreen extends ConsumerWidget {
-  const LiveKitScreen({Key? key}) : super(key: key);
+  const LiveKitScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
